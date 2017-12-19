@@ -1,0 +1,11 @@
+/pkg/
+/src/
+/xsa*
+
+*.tar
+*.gz
+*.xz
+*.tgz
+*.bz2
+*.sig
+000*
