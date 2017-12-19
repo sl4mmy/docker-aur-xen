@@ -1,0 +1,2 @@
+# _build needs to be able to install dependencies automatically
+_build	ALL=(root)	NOPASSWD: /usr/bin/pacman

@@ -1,0 +1,52 @@
+# Version 0.0.1
+FROM ${REPOSITORY}/archlinux-base-multilib:${ARCH_VERSION}
+
+ENV ARCH_VERSION ${ARCH_VERSION}
+
+ENV VERSION ${VERSION}
+
+ENV REFRESHED_AT ${DATE}
+
+# Ensure base-devel group is installed
+RUN [ "/usr/bin/pacman", "--noconfirm", "--sync", "--quiet", "base-devel" ]
+
+# Ensure man(1) is installed
+RUN [ "/usr/bin/pacman", "--noconfirm", "--sync", "--quiet", "man" ]
+
+# Create sudo group
+RUN [ "/usr/sbin/groupadd", "sudo" ]
+
+# Create a system user named _build and add it to the sudo group
+RUN [ "/usr/sbin/useradd", "--system", "--user-group", "--groups", "sudo", "--shell", "/usr/bin/nologin", "_build" ]
+
+# Ensure _build can install build dependencies
+ADD build.sudoers /etc/sudoers.d/_build
+
+# Configure makepkg(1)
+RUN [ "/usr/sbin/sed", "--in-place", "/^#BUILDDIR=/ s/^#BUILDDIR=.*$/BUILDDIR=\\/opt\\/aur-xen\\/build/", "/etc/makepkg.conf" ]
+RUN [ "/usr/sbin/sed", "--in-place", "/^#PKGDEST=/ s/^#PKGDEST=.*$/PKGDEST=\\/opt\\/aur-xen\\/output/", "/etc/makepkg.conf" ]
+RUN [ "/usr/sbin/sed", "--in-place", "/^#SRCDEST=/ s/^#SRCDEST=.*$/SRCDEST=\\/opt\\/aur-xen\\/src/", "/etc/makepkg.conf" ]
+
+# Populate Xen pkg spec
+COPY --chown=_build:_build aur-xen/ /opt/aur-xen/
+
+# Patch makepkg(1) so it doesn't unconditionally try to create & chmod $srcdir
+COPY --chown=_build:_build usr_bin_makepkg.diff /tmp/
+WORKDIR /usr/bin
+RUN /usr/bin/patch -p0 </tmp/usr_bin_makepkg.diff
+
+USER _build
+WORKDIR /opt/aur-xen
+
+# Ensure /opt/aur-xen/output is created with the correct owner before mounting a volume on it
+RUN [ "/usr/sbin/mkdir", "/opt/aur-xen/output" ]
+
+# Declare volumes for src output, build output & final package destination
+# TODO: uncomment line below when Docker supports overriding noexec mount flag on tmpfs volumes (see: https://github.com/moby/moby/issues/32131)
+# VOLUME /opt/aur-xen/build
+VOLUME /opt/aur-xen/output
+VOLUME /opt/aur-xen/src
+
+# Build the package
+# TODO: figure out how to import Xen's signing key into _build's keychain
+CMD [ "/usr/bin/makepkg", "--clean", "--needed", "--noconfirm", "--rmdeps", "--skippgpcheck", "--syncdeps" ]
