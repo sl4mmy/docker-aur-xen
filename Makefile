@@ -11,7 +11,7 @@ DOCKER_REPOSITORY ?= sl4mmy
 all: Dockerfile build.sudoers pkg/ usr_bin_makepkg.diff
 	docker build --rm=true --tag="$(DOCKER_REPOSITORY)/$(NAME):$(VERSION)" $(DOCKER_FLAGS) .
 
-Dockerfile: Dockerfile.in
+Dockerfile: Dockerfile.in Makefile
 	sed "s/\$${ARCH_VERSION}/$(ARCH_VERSION)/; s/\$${VERSION}/$(VERSION)/; s/\$${REPOSITORY}/$(DOCKER_REPOSITORY)/; s/\$${DATE}/$(DATE)/" $(<) >$(@)
 
 pkg/:
