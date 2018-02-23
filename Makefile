@@ -13,7 +13,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 NAME = aur-xen
-VERSION = 4.9.0
+VERSION = 4.10.0
 
 ARCH_VERSION = `/bin/date +%Y.%m`
 DATE = `/bin/date +%Y-%m-%d`
@@ -22,7 +22,7 @@ DOCKER_FLAGS ?= --memory=4GB --rm=true
 DOCKER_MOUNTS ?= --mount type=bind,source=$(PWD)/pkg,destination=/opt/output
 DOCKER_REPOSITORY ?= sl4mmy
 
-all: Dockerfile pkg/ apply-ocaml-unsafe-string.patch mingw-w64-binutils-2.29-1-x86_64.pkg.tar.xz ocaml-unsafe-string.patch
+all: Dockerfile pkg/ mingw-w64-binutils-2.29-1-x86_64.pkg.tar.xz
 	docker build --rm=true --tag="$(DOCKER_REPOSITORY)/$(NAME):$(VERSION)" $(DOCKER_FLAGS) .
 
 Dockerfile: Dockerfile.in Makefile

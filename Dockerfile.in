@@ -30,15 +30,8 @@ RUN [ "/usr/bin/pacman", "--noconfirm", "--upgrade", "/opt/mingw-w64-binutils-2.
 # Populate Xen pkg spec
 COPY --chown=_build:_build aur-xen/ /opt/aur-xen/
 
-# Copy patches to silence OCaml unsafe string compiler errors
-COPY --chown=_build:_build apply-ocaml-unsafe-string.patch /opt/aur-xen/
-COPY --chown=_build:_build ocaml-unsafe-string.patch /opt/aur-xen/
-
 USER _build
 WORKDIR /opt/aur-xen
-
-# Apply patch to PKGBUILD which will apply OCaml unsafe string compiler error fix during build
-RUN [ "/usr/bin/patch", "-Np0", "-i", "apply-ocaml-unsafe-string.patch" ]
 
 # Build the package
 # TODO: figure out how to import Xen's signing key into _build's keychain
