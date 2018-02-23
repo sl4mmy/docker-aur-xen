@@ -19,10 +19,10 @@ ARCH_VERSION = `/bin/date +%Y.%m`
 DATE = `/bin/date +%Y-%m-%d`
 
 DOCKER_FLAGS ?= --memory=4GB --rm=true
-DOCKER_MOUNTS ?= --mount type=tmpfs,destination=/opt/aur-xen/src,tmpfs-size=1G --mount type=bind,source=$(PWD)/pkg,destination=/opt/aur-xen/output
+DOCKER_MOUNTS ?= --mount type=bind,source=$(PWD)/pkg,destination=/opt/output
 DOCKER_REPOSITORY ?= sl4mmy
 
-all: Dockerfile build.sudoers pkg/ usr_bin_makepkg.diff
+all: Dockerfile pkg/ apply-ocaml-unsafe-string.patch mingw-w64-binutils-2.29-1-x86_64.pkg.tar.xz ocaml-unsafe-string.patch
 	docker build --rm=true --tag="$(DOCKER_REPOSITORY)/$(NAME):$(VERSION)" $(DOCKER_FLAGS) .
 
 Dockerfile: Dockerfile.in Makefile
