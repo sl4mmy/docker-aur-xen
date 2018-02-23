@@ -1,4 +1,4 @@
-NAME = aur-xen-builder
+NAME = aur-xen
 VERSION = 4.9.0
 
 ARCH_VERSION = `/bin/date +%Y.%m`
