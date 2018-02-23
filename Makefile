@@ -29,7 +29,7 @@ update: Dockerfile.in
 	$(MAKE)
 
 clean:
-	-rm Dockerfile
+	-rm -f Dockerfile
 	-rm -rf pkg/
 
 .PHONY: all attach clean run update
