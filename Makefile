@@ -24,7 +24,7 @@ run:
 	docker run --interactive=true --tty=true --rm=true --name="$(NAME)-$(VERSION)-run" $(DOCKER_MOUNTS) "$(DOCKER_REPOSITORY)/$(NAME):$(VERSION)"
 
 update: Dockerfile.in
-	git subtree pull --prefix aur-xen https://aur.archlinux.org/xen.git master --squash
+	git subtree pull --prefix $(NAME) https://aur.archlinux.org/xen.git master --squash
 	sed "s/\$${ARCH_VERSION}/$(ARCH_VERSION)/; s/\$${VERSION}/$(VERSION)/; s/\$${REPOSITORY}/$(DOCKER_REPOSITORY)/; s/\$${DATE}/$(DATE)/" $(<) >Dockerfile
 	$(MAKE)
 
