@@ -22,7 +22,7 @@ DOCKER_FLAGS ?= --memory=4GB --rm=true
 DOCKER_MOUNTS ?= --mount type=bind,source=$(PWD)/pkg,destination=/opt/output
 DOCKER_REPOSITORY ?= sl4mmy
 
-all: Dockerfile pkg/
+all: Dockerfile pkg/ PKGBUILD.patch tools_libacpi_Makefile.patch
 	docker build --rm=true --tag="$(DOCKER_REPOSITORY)/$(NAME):$(VERSION)" $(DOCKER_FLAGS) .
 
 Dockerfile: Dockerfile.in Makefile

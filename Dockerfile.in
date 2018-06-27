@@ -26,8 +26,17 @@ RUN [ "/usr/bin/pacman", "--noconfirm", "--sync", "--quiet", "man" ]
 # Populate Xen pkg spec
 COPY --chown=_build:_build aur-xen/ /opt/aur-xen/
 
+# Copy PKGBUILD.patch
+COPY --chown=_build:_build PKGBUILD.patch /opt/aur-xen/
+
+# Copy tools_libacpi_Makefile.patch
+COPY --chown=_build:_build tools_libacpi_Makefile.patch /opt/aur-xen/
+
 USER _build
 WORKDIR /opt/aur-xen
+
+# Patch PKGBUILD to apply tools_libacpi_Makefile.patch
+RUN [ "/bin/sh", "-c", "/usr/bin/patch -p0 <PKGBUILD.patch" ]
 
 # Build the package
 # TODO: figure out how to import Xen's signing key into _build's keychain
