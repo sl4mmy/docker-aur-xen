@@ -22,7 +22,7 @@ DOCKER_FLAGS ?= --memory=4GB --rm=true
 DOCKER_MOUNTS ?= --mount type=bind,source=$(PWD)/pkg,destination=/opt/output
 DOCKER_REPOSITORY ?= sl4mmy
 
-all: Dockerfile pkg/ mingw-w64-binutils-2.29-1-x86_64.pkg.tar.xz
+all: Dockerfile pkg/
 	docker build --rm=true --tag="$(DOCKER_REPOSITORY)/$(NAME):$(VERSION)" $(DOCKER_FLAGS) .
 
 Dockerfile: Dockerfile.in Makefile

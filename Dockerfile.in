@@ -23,10 +23,6 @@ ENV REFRESHED_AT ${DATE}
 # Ensure man(1) is installed
 RUN [ "/usr/bin/pacman", "--noconfirm", "--sync", "--quiet", "man" ]
 
-# Copy & install mingw-w64-binutils package
-COPY --chown=_build:_build mingw-w64-binutils-2.29-1-x86_64.pkg.tar.xz /opt/
-RUN [ "/usr/bin/pacman", "--noconfirm", "--upgrade", "/opt/mingw-w64-binutils-2.29-1-x86_64.pkg.tar.xz" ]
-
 # Populate Xen pkg spec
 COPY --chown=_build:_build aur-xen/ /opt/aur-xen/
 
