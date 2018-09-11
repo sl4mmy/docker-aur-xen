@@ -13,7 +13,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 NAME = aur-xen
-VERSION = 4.10.1
+VERSION = 4.11.0
 
 ARCH_VERSION = `/bin/date +%Y.%m`
 DATE = `/bin/date +%Y-%m-%d`
@@ -22,7 +22,7 @@ DOCKER_FLAGS ?= --memory=4GB --rm=true
 DOCKER_MOUNTS ?= --mount type=bind,source=$(PWD)/pkg,destination=/opt/output
 DOCKER_REPOSITORY ?= sl4mmy
 
-all: Dockerfile pkg/ PKGBUILD.patch tools_libacpi_Makefile.patch
+all: Dockerfile pkg/
 	docker build --rm=true --tag="$(DOCKER_REPOSITORY)/$(NAME):$(VERSION)" $(DOCKER_FLAGS) .
 
 Dockerfile: Dockerfile.in Makefile
