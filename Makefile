@@ -13,7 +13,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 NAME = aur-xen
-VERSION = 4.11.0
+VERSION = 4.12.0
 
 ARCH_VERSION = `/bin/date +%Y.%m`
 DATE = `/bin/date +%Y-%m-%d`
