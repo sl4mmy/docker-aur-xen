@@ -1,0 +1,17 @@
+Remove -Werror from CFLAGS when building OCaml tools due to const
+correctness violations following OCaml API changes.
+
+Via https://aur.archlinux.org/packages/xen/#comment-711986
+
+diff --git a/aur-xen/PKGBUILD b/aur-xen/PKGBUILD
+index 4d20f9c..4523ae0 100644
+--- a/aur-xen/PKGBUILD
++++ b/aur-xen/PKGBUILD
+@@ -156,6 +156,7 @@ prepare() {
+   msg2 'Applying misc compile fixes...'
+ 
+   # Compile fixes.
++  sed 's/CFLAGS += -fPIC -Werror -I$(shell ocamlc -where)/CFLAGS += -fPIC -I$(shell ocamlc -where)/' -i tools/ocaml/common.make
+ 
+   # Fix Install Paths.
+   msg2 'Fixing installation paths...'
