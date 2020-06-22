@@ -33,6 +33,8 @@ WORKDIR /opt/aur-xen
 RUN [ "/usr/bin/makepkg", "--needed", "--nobuild", "--noconfirm", "--noextract", "--skippgpcheck", "--skipchecksums", "--syncdeps" ]
 
 ADD --chown=_build:_build aur-xen_PKGBUILD.patch /opt/aur-xen/
+ADD --chown=_build:_build gcc-10-fixes.patch /opt/aur-xen/
+ADD --chown=_build:_build gcc-10-ipxe-fixes.patch /opt/aur-xen/
 
 RUN [ "/usr/sbin/patch", "-p2", "PKGBUILD", "aur-xen_PKGBUILD.patch" ]
 

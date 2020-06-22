@@ -1,17 +1,138 @@
-Remove -Werror from CFLAGS when building OCaml tools due to const
-correctness violations following OCaml API changes.
+Bump to Xen v4.13.1.
 
-Via https://aur.archlinux.org/packages/xen/#comment-711986
+Extract the git commit id of iPXE distributed by Xen into a
+variable in case upstream ever changes it.
+
+Drop dependency on Python 2.
+
+Apply local patches for GCC 10 compile fixes for both Xen and iPXE.
+
+Explicitly set path of pod2man as POD2MAN environment variable when
+running configure so it is automatically picked up for docs/.  Also,
+drop "--with-sdlabi" configure arg because upstream removed support
+for choosing between different SDL ABI versions.
 
 diff --git a/aur-xen/PKGBUILD b/aur-xen/PKGBUILD
-index 4d20f9c..4523ae0 100644
+index 4d20f9c..3bd2c43 100644
 --- a/aur-xen/PKGBUILD
 +++ b/aur-xen/PKGBUILD
-@@ -156,6 +156,7 @@ prepare() {
-   msg2 'Applying misc compile fixes...'
+@@ -10,9 +10,11 @@
+ # Build variables to enable certain optional features.
+ _build_stubdom=${build_stubdom:-false}
+ 
++ipxe_commit="1dd56dbd11082fb622c2ed21cfaced4f47d798a6"
++
+ pkgbase="xen"
+ pkgname=("xen" "xen-docs")
+-pkgver="4.12.1"
++pkgver="4.13.1"
+ pkgrel="1"
+ arch=("x86_64") # TODO What about ARM?
+ url="http://www.xenproject.org/"
+@@ -49,7 +51,7 @@ makedepends=(
+   "pandoc"
+   "pciutils"
+   "perl"
+-  "python2"
++  "python"
+   "sdl"
+   "spice"
+   "spice-glib"
+@@ -62,7 +64,7 @@ makedepends=(
+ source=(
+   "https://downloads.xenproject.org/release/xen/${pkgver}/${pkgbase}-${pkgver}.tar.gz"
+   "https://downloads.xenproject.org/release/xen/${pkgver}/${pkgbase}-${pkgver}.tar.gz.sig"
+-  "ipxe-git.tar.gz::http://xenbits.xen.org/xen-extfiles/ipxe-git-1dd56dbd11082fb622c2ed21cfaced4f47d798a6.tar.gz"
++  "ipxe-git.tar.gz::http://xenbits.xen.org/xen-extfiles/ipxe-git-${ipxe_commit}.tar.gz"
+ 
+   # Helper and config files.
+   "grub-mkconfig-helper"
+@@ -74,9 +76,11 @@ source=(
+   # XSA patches.
  
    # Compile fixes.
-+  sed 's/CFLAGS += -fPIC -Werror -I$(shell ocamlc -where)/CFLAGS += -fPIC -I$(shell ocamlc -where)/' -i tools/ocaml/common.make
++  "gcc-10-fixes.patch"
++  "gcc-10-ipxe-fixes.patch"
+ )
+ sha256sums=(
+-  "5450a85497b84167df1d229b3ab98fb24ef4d6b0510dce522798c13c1b090159"
++  "b97ce363e55b12c992063f4466c43cba0a6386ceb7a747b4dc670311f337ef01"
+   "SKIP"
+   "fcb2b5da90a59a0011db7403a1ea7887b0dfb04ef91a7d31964c63ed14f7a426"
+ 
+@@ -90,6 +94,8 @@ sha256sums=(
+   # XSA patches.
+ 
+   # Compile fixes.
++  "e60f81cf279e2ae1ecbd3b1fdbdb135742961ebf0e78da567b04600bdf8ecca5"
++  "ef24f24940f92a2b7d8b69248b6cb8f2a0c7b209106dcca941c2e0acae3bb573"
+ )
+ noextract=(
+   "ipxe-git.tar.gz"
+@@ -138,6 +144,7 @@ prepare() {
+   # Preparing downloads.
+   msg2 'Copying downloaded files...'
+   cp "${srcdir}/ipxe-git.tar.gz" tools/firmware/etherboot/ipxe.tar.gz
++  cp "${srcdir}/gcc-10-ipxe-fixes.patch" tools/firmware/etherboot/patches/
+ 
+   # XSA patches.
+   msg2 'Applying XSA patches...'
+@@ -154,8 +161,8 @@ prepare() {
+ 
+   # Misc compile fixes (removed in future versions if not needed anymore).
+   msg2 'Applying misc compile fixes...'
+-
+-  # Compile fixes.
++  patch -p1 <../gcc-10-fixes.patch
++  echo gcc-10-ipxe-fixes.patch >> tools/firmware/etherboot/patches/series
  
    # Fix Install Paths.
    msg2 'Fixing installation paths...'
+@@ -191,7 +198,7 @@ build() {
+   # Configure Xen.
+   msg2 'Configuring...'
+   ./autogen.sh
+-  PYTHON=/usr/bin/python2 ./configure \
++  POD2MAN=/usr/bin/core_perl/pod2man PYTHON=/usr/bin/python ./configure \
+     --prefix=/usr \
+     --sbindir=/usr/bin \
+     --with-sysconfig-leaf-dir=conf.d \
+@@ -213,11 +220,10 @@ build() {
+       --disable-smartcard \
+       --disable-fdt \
+       --enable-spice \
+-      --enable-usb-redir \
+-      --with-sdlabi=1.2"
++      --enable-usb-redir"
+ 
+   msg2 'Building Xen...'
+-  make LANG=C PYTHON=python2 dist
++  make LANG=C PYTHON=python dist
+ }
+ 
+ package_xen() {
+@@ -237,7 +243,7 @@ package_xen() {
+     "libpng"
+     "lzo"
+     "pciutils"
+-    "python2"
++    "python"
+     "sdl"
+     "spice"
+     "usbredir"
+@@ -264,7 +270,7 @@ package_xen() {
+ 
+   cd "${srcdir}/${pkgbase}-${pkgver}"
+   msg2 'Installing Xen...'
+-  make DESTDIR="${pkgdir}" LANG=C PYTHON=python2 install
++  make DESTDIR="${pkgdir}" LANG=C PYTHON=python install
+ 
+   # Install files for Arch Linux.
+   msg2 'Installing Arch-specific files...'
+@@ -322,5 +328,5 @@ package_xen-docs() {
+ 
+   cd "${srcdir}/${pkgbase}-${pkgver}"
+   msg2 'Installing documentation...'
+-  make DESTDIR="${pkgdir}" LANG=C PYTHON=python2 install-docs
++  make DESTDIR="${pkgdir}" LANG=C PYTHON=python install-docs
+ }

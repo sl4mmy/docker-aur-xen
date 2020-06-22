@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018 Kent R. Spillner <kspillner@acm.org>
+# Copyright (c) 2017-2020 Kent R. Spillner <kspillner@acm.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +13,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 NAME = aur-xen
-VERSION = 4.12.1
+VERSION = 4.13.1
 
 ARCH_VERSION = `/bin/date +%Y.%m`
 DATE = `/bin/date +%Y-%m-%d`
@@ -22,7 +22,7 @@ DOCKER_FLAGS ?= --memory=4GB --rm=true
 DOCKER_MOUNTS ?= --mount type=bind,source=$(PWD)/pkg,destination=/opt/output
 DOCKER_REPOSITORY ?= sl4mmy
 
-all: Dockerfile pkg/ aur-xen_PKGBUILD.patch
+all: Dockerfile pkg/ aur-xen_PKGBUILD.patch gcc-10-fixes.patch gcc-10-ipxe-fixes.patch
 	docker build --rm=true --tag="$(DOCKER_REPOSITORY)/$(NAME):$(VERSION)" $(DOCKER_FLAGS) .
 
 Dockerfile: Dockerfile.in Makefile

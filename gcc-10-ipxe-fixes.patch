@@ -1,0 +1,41 @@
+The first hunk originally comes from the ipxe-devel mailing
+list: https://lists.ipxe.org/pipermail/ipxe-devel/2020-May/007047.html
+
+The second hunk is a modified version of Gentoo's patch (modified to
+drop -fcommon which is already handled by the first hunk in a more
+targeted manner)::
+https://github.com/hydrapolic/gentoo-dist/blob/master/xen/xen-gentoo-patches-21.tar.xz
+(file: xen-tools-4.13.0-ipxe-gcc10.patch)
+
+diff --git a/src/Makefile b/src/Makefile
+index d74565d..2ad5b39 100644
+--- a/src/Makefile.housekeeping
++++ b/src/Makefile.housekeeping
+@@ -170,6 +170,16 @@ CFI_FLAGS := $(shell $(CFI_TEST) && \
+ WORKAROUND_CFLAGS += $(CFI_FLAGS)
+ endif
+ 
++# gcc 10 switched default behavior from -fcommon to -fno-common. Since
++# "__shared" relies on the legacy behavior, explicitly specify it.
++#
++ifeq ($(CCTYPE),gcc)
++FCOMMON_TEST = $(CC) -fcommon -x c -c /dev/null \
++		   -o /dev/null >/dev/null 2>&1
++FCOMMON_FLAGS := $(shell $(FCOMMON_TEST) && $(ECHO) '-fcommon')
++WORKAROUND_CFLAGS += $(FCOMMON_FLAGS)
++endif
++
+ # gcc 4.6 generates spurious warnings if -Waddress is in force.
+ # Inhibit this.
+ #
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -4,7 +4,7 @@
+ #
+ 
+ CLEANUP		:=
+-CFLAGS		:=
++CFLAGS		:= -Wno-enum-conversion -Wno-array-bounds
+ ASFLAGS		:=
+ LDFLAGS		:=
+ HOST_CFLAGS	:=
