@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018 Kent R. Spillner <kspillner@acm.org>
+# Copyright (c) 2017-2020 Kent R. Spillner <kspillner@acm.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -26,12 +26,21 @@ RUN [ "/usr/bin/pacman", "--noconfirm", "--sync", "--quiet", "man" ]
 # Populate Xen pkg spec
 COPY --chown=_build:_build aur-xen/ /opt/aur-xen/
 
-ADD --chown=_build:_build aur-xen_PKGBUILD.patch /opt/aur-xen/
-
 USER _build
 WORKDIR /opt/aur-xen
 
+# Install initial set of build deps in order to save bandwidth when frequently testing patches
+RUN [ "/usr/bin/makepkg", "--needed", "--nobuild", "--noconfirm", "--noextract", "--skippgpcheck", "--skipchecksums", "--syncdeps" ]
+
+ADD --chown=_build:_build aur-xen_PKGBUILD.patch /opt/aur-xen/
+
 RUN [ "/usr/sbin/patch", "-p2", "PKGBUILD", "aur-xen_PKGBUILD.patch" ]
+
+# Re-sync deps after patching
+RUN [ "/usr/bin/makepkg", "--needed", "--nobuild", "--noconfirm", "--skippgpcheck", "--skipchecksums", "--syncdeps" ]
+
+# Print checksums for distfiles
+RUN [ "/usr/bin/makepkg", "--geninteg" ]
 
 # Build the package
 # TODO: figure out how to import Xen's signing key into _build's keychain
